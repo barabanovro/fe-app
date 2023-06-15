@@ -5,10 +5,12 @@ import { getTokenAddresses } from "../constants/amm";
 
 export const claim = async (
   account: AccountInterface,
-  calldata: string[],
+  data: string[],
   setText: (txt: string) => void
 ) => {
   const contractAddress = getTokenAddresses().GOVERNANCE_CONTRACT_ADDRESS;
+  const [address, amount, ...proof] = data;
+  const calldata = [address, amount, String(proof.length), ...proof];
   const call = {
     contractAddress,
     entrypoint: "claim",

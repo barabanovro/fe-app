@@ -1,8 +1,8 @@
 import { AccountInterface } from "starknet";
-import { API_URL_MAINNET } from "../../constants/amm";
+import { API_URL_MAINNET, coreTeamAddresses } from "../../constants/amm";
 import { balanceOfCarmineToken } from "../../calls/balanceOf";
 import { BN } from "bn.js";
-import { hexToBN } from "../../utils/utils";
+import { hexToBN, standardiseAddress } from "../../utils/utils";
 import { debug } from "../../utils/debugger";
 
 type Eligible = {
@@ -35,11 +35,12 @@ export const getProof = async (
     return { eligible: false };
   }
 
+  const isCoreTeam = coreTeamAddresses.includes(standardiseAddress(account.address));
   const total = hexToBN(merkleTreeResponse.data[1]);
   const claimed = new BN(carmBalanceResponse);
   const diff = total.sub(claimed);
   // account for tiny differences
-  const claimable = diff.lt(new BN(100)) ? "0" : diff.toString(10);
+  const claimable = isCoreTeam ? total.toString(10) : (diff.lt(new BN(100)) ? "0" : diff.toString(10));
 
   debug("CARM token claim data:", {
     total: total.toString(10),

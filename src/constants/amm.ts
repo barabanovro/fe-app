@@ -1,6 +1,7 @@
 import BN from "bn.js";
 import { store } from "../redux/store";
 import { NetworkName } from "../types/network";
+import { standardiseAddress } from "../utils/utils";
 
 type TokenAddresses = {
   ETH_ADDRESS: string;
@@ -99,6 +100,14 @@ export const enum AMM_METHODS {
   WITHDRAW_LIQUIDITY = "withdraw_liquidity",
   GET_TOTAL_PREMIA = "get_total_premia",
 }
+
+export const coreTeamAddresses = [
+  "0x583a9d956d65628f806386ab5b12dccd74236a3c6b930ded9cf3c54efc722a1",
+  "0x6717eaf502baac2b6b2c6ee3ac39b34a52e726a73905ed586e757158270a0af",
+  "0x11d341c6e841426448ff39aa443a6dbb428914e05ba2259463c18308b86233",
+  "0x3d1525605db970fa1724693404f5f64cba8af82ec4aab514e6ebd3dec4838ad",
+  "0x3c032b19003bdd6f4155a30fffa0bda3a9cae45feb994a721299d7e5096568c"
+];
 
 export const SLIPPAGE = 0.1;
 
