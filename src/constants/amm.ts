@@ -1,7 +1,6 @@
 import BN from "bn.js";
 import { store } from "../redux/store";
 import { NetworkName } from "../types/network";
-import { standardiseAddress } from "../utils/utils";
 
 type TokenAddresses = {
   ETH_ADDRESS: string;

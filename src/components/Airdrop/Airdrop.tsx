@@ -52,20 +52,20 @@ export const Airdrop = () => {
     );
   }
 
-  if (loading || !data) {
-    return (
-      <AirdropTemplate
-        account={account}
-        message="Checking if you are eligible for and airdrop..."
-      />
-    );
-  }
-
   if (!account) {
     return (
       <AirdropTemplate
         account={account}
         message="Connect your wallet to see if you are eligible for an airdrop"
+      />
+    );
+  }
+
+  if (loading || !data) {
+    return (
+      <AirdropTemplate
+        account={account}
+        message="Checking if you are eligible for an airdrop..."
       />
     );
   }

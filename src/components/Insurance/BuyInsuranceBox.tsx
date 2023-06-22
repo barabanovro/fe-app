@@ -54,12 +54,14 @@ export const BuyInsuranceBox = () => {
   const [textSize, setTextSize] = useState<string>(
     displayBalance ? displayBalance : "0"
   );
+  const [interacted, setInteracted] = useState(false);
   const [expiry, setExpiry] = useState<number>();
 
-  if (displayBalance && size === 0) {
-    // if no size has been set, set it to user balance
+  if (displayBalance && !interacted) {
+    // if no interaction with input, set size to user balance
     setSize(parseFloat(displayBalance));
     setTextSize(displayBalance);
+    setInteracted(true);
   }
 
   if (valueInUsd === undefined || isLoading) {
@@ -71,9 +73,11 @@ export const BuyInsuranceBox = () => {
   }
 
   const balanceMessage = balance
-    ? `You currently have ${token.symbol} ${displayBalance}`
+    ? `You currently have`
     : "Getting your balance...";
-  const assetPriceMessage = `Current ${token.symbol} price is $${valueInUsd}`;
+  const balanceDisplay = `${displayBalance} ${token.symbol}`;
+  const assetPriceMessage = `Current ${token.symbol} price`;
+  const assetPriceDisplay = `$${valueInUsd}`;
 
   const options = data.filter(
     // only Long Puts for the chosen currency
@@ -94,7 +98,14 @@ export const BuyInsuranceBox = () => {
   const handleExpiryChange = (event: SelectChangeEvent) => {
     setExpiry(parseInt(event.target.value) as number);
   };
-  const handleSizeChange = handleNumericChangeFactory(setTextSize, setSize);
+  const handleSizeChange = handleNumericChangeFactory(
+    setTextSize,
+    setSize,
+    (n) => {
+      setInteracted(true);
+      return n;
+    }
+  );
 
   if (options.length === 0) {
     // no options for the given currency
@@ -171,81 +182,116 @@ export const BuyInsuranceBox = () => {
         gap: 2,
       }}
     >
-      <Box sx={rowSx}>
-        <Typography>Select crypto asset to insure</Typography>
-        <FormControl size="small">
-          <InputLabel id="currency-select-label">Asset</InputLabel>
-          <Select
-            sx={{ px: 1 }}
-            labelId="currency-select-label"
-            id="currency-select"
-            value={currency}
-            label="Asset"
-            onChange={handleCurrencyChange}
-          >
-            <MenuItem value={TokenKey.ETH}>ETH</MenuItem>
-            <MenuItem disabled>More coming!</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-      <Typography>{balanceMessage}</Typography>
-      <Typography>{assetPriceMessage}</Typography>
-      <Box sx={rowSx}>
-        <Typography>Select price to insure</Typography>
-        <FormControl size="small">
-          <InputLabel id="strike-select-label">Price</InputLabel>
-          <Select
-            sx={{ px: 1 }}
-            labelId="strike-select-label"
-            id="strike-select"
-            label="Insure price"
-            value={"" + currentStrike}
-            onChange={handleStrikeChange}
-          >
-            {strikes.map((s) => (
-              <MenuItem key={s} value={s}>
-                ${s}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-      <Box sx={rowSx}>
-        <Typography>Select expiry</Typography>
-        <FormControl size="small">
-          <InputLabel id="expiry-select-label">Expiry</InputLabel>
-          <Select
-            sx={{ px: 1 }}
-            labelId="expiry-select-label"
-            id="expiry-select"
-            label="Expiry"
-            value={expiry ? expiry + "" : undefined}
-            onChange={handleExpiryChange}
-          >
-            {expiries.map((e, i) => (
-              <MenuItem key={i} value={e}>
-                {timestampToReadableDate(e * 1000)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-      <Box sx={rowSx}>
-        <Typography>Select size to insure</Typography>
-        <TextField
-          id="outlined-number"
-          label="Size"
-          size="small"
-          value={textSize}
-          InputLabelProps={{
-            shrink: true,
-          }}
-          inputProps={{
-            inputMode: "decimal",
-          }}
-          onChange={handleSizeChange}
-        />
-      </Box>
+      <table style={{ borderSpacing: "15px" }}>
+        <tbody>
+          <tr>
+            <td>
+              <Typography>Select crypto asset to insure</Typography>
+            </td>
+            <td>
+              <FormControl size="small">
+                <InputLabel id="currency-select-label">Asset</InputLabel>
+                <Select
+                  sx={{ px: 1 }}
+                  labelId="currency-select-label"
+                  id="currency-select"
+                  value={currency}
+                  label="Asset"
+                  onChange={handleCurrencyChange}
+                >
+                  <MenuItem value={TokenKey.ETH}>ETH</MenuItem>
+                  <MenuItem disabled>More coming!</MenuItem>
+                </Select>
+              </FormControl>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Typography>{balanceMessage}</Typography>
+            </td>
+            <td>
+              <Typography>{balanceDisplay}</Typography>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Typography>{assetPriceMessage}</Typography>
+            </td>
+            <td>
+              <Typography>{assetPriceDisplay}</Typography>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Typography>Select price to insure</Typography>
+            </td>
+            <td>
+              <FormControl size="small">
+                <InputLabel id="strike-select-label">Price</InputLabel>
+                <Select
+                  sx={{ px: 1 }}
+                  labelId="strike-select-label"
+                  id="strike-select"
+                  label="Insure price"
+                  value={"" + currentStrike}
+                  onChange={handleStrikeChange}
+                >
+                  {strikes.map((s) => (
+                    <MenuItem key={s} value={s}>
+                      ${s}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Typography>Select expiry</Typography>
+            </td>
+            <td>
+              <FormControl size="small">
+                <InputLabel id="expiry-select-label">Expiry</InputLabel>
+                <Select
+                  sx={{ px: 1 }}
+                  labelId="expiry-select-label"
+                  id="expiry-select"
+                  label="Expiry"
+                  value={expiry ? expiry + "" : undefined}
+                  onChange={handleExpiryChange}
+                >
+                  {expiries.map((e, i) => (
+                    <MenuItem key={i} value={e}>
+                      {timestampToReadableDate(e * 1000)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>{" "}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <Typography>Select size to insure</Typography>
+            </td>
+            <td>
+              <TextField
+                id="outlined-number"
+                label="Size"
+                size="small"
+                value={textSize}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                inputProps={{
+                  inputMode: "decimal",
+                }}
+                onChange={handleSizeChange}
+              />{" "}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
       {!account && <Typography>Connect wallet to buy insurance</Typography>}
       <Button
         disabled={!account}
