@@ -1,61 +1,47 @@
 import { debug } from "../../utils/debugger";
 import { OptionWithPremia } from "../../classes/Option";
 import { getNonExpiredOptions } from "../../calls/getNonExpiredOptions";
-import { parseBatchOfOptions } from "../../utils/optionParsers/batch";
-import { parseNonExpiredOption } from "../../utils/optionParsers/parseNonExpiredOption";
 import { chooseType } from "./chooseType";
 import { OptionType } from "../../types/options";
 
 export const fetchOptionsWithType = async (): Promise<
   [OptionWithPremia[], OptionType]
 > => {
-  const [rawDataResult, chosenTypeResult] = await Promise.allSettled([
+  const [optionsResult, chosenTypeResult] = await Promise.allSettled([
     getNonExpiredOptions(),
     chooseType(),
   ]);
 
   if (
-    rawDataResult.status === "rejected" ||
+    optionsResult.status === "rejected" ||
     chosenTypeResult.status === "rejected"
   ) {
     debug("Failed fetching options and type", {
-      rawDataResult,
+      optionsResult,
       chosenTypeResult,
     });
     return [[], OptionType.Call];
   }
 
-  const rawData = rawDataResult.value;
+  const optionsWithPremia = optionsResult.value;
   const chosenType = chosenTypeResult.value;
 
-  const optionsWithPremia = parseBatchOfOptions(
-    rawData,
-    7,
-    parseNonExpiredOption
-  );
-
-  debug("Parsed fetched options", optionsWithPremia);
+  debug("Fetched options with premia (with type)", optionsWithPremia);
 
   return [optionsWithPremia, chosenType];
 };
 
 export const fetchOptions = async (): Promise<OptionWithPremia[]> => {
-  const rawData = await getNonExpiredOptions().catch((e) => {
+  const optionsWithPremia = await getNonExpiredOptions().catch((e) => {
     debug("fetch options failed:", e);
     return null;
   });
 
-  if (rawData === null) {
+  if (optionsWithPremia === null) {
     return [];
   }
 
-  const optionsWithPremia = parseBatchOfOptions(
-    rawData,
-    7,
-    parseNonExpiredOption
-  );
-
-  debug("Parsed fetched options", optionsWithPremia);
+  debug("Fetched options with premia", optionsWithPremia);
 
   return optionsWithPremia;
 };

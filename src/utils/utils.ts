@@ -166,12 +166,15 @@ export const getApiUrl = () => {
 };
 
 export const addressElision = (address: string, n: number = 5): string => {
-  if (address.length < 2 * n) {
+  const standardised = standardiseAddress(address);
+
+  if (standardised.length < 2 * n) {
     // too short for elision
-    return address;
+    return standardised;
   }
-  const start = address.substring(0, n);
-  const end = address.substring(address.length - n);
+
+  const start = standardised.substring(0, n);
+  const end = standardised.substring(standardised.length - n);
 
   return `${start}...${end}`;
 };

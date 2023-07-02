@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Tooltip, Typography } from "@mui/material";
 import { usePremiaQuery } from "../../hooks/usePremiaQuery";
 import { CustomDialogTitle } from "../MultiDialog/MultiDialog";
 
@@ -52,7 +52,7 @@ const WithOption = ({ option, size, updateTradeState }: Props) => {
     );
   }
 
-  const premia = math64x61toDecimal(data).toFixed(2);
+  const premia = math64x61toDecimal(data);
   const premiaWithSlippage = getPremiaWithSlippage(
     new BN(math64x61ToInt(data, option.digits)),
     option.parsed.optionSide,
@@ -61,7 +61,7 @@ const WithOption = ({ option, size, updateTradeState }: Props) => {
   const displayPremiaWithSlippage = shortInteger(
     premiaWithSlippage.toString(10),
     option.digits
-  ).toFixed(2);
+  );
   const slippage = store.getState().settings.slippage;
 
   const handleClick = () =>
@@ -94,7 +94,11 @@ const WithOption = ({ option, size, updateTradeState }: Props) => {
           }}
         >
           <Typography sx={{ fontSize: "1.2rem" }}>Insurance price</Typography>
-          <Typography sx={{ fontSize: "1.2rem" }}>${premia}</Typography>
+          <Tooltip title={`$${premia}`} placement="top">
+            <Typography sx={{ fontSize: "1.2rem" }}>
+              ${premia.toFixed(2)}
+            </Typography>
+          </Tooltip>
         </Box>
         <Box
           sx={{
@@ -106,9 +110,11 @@ const WithOption = ({ option, size, updateTradeState }: Props) => {
           <Typography sx={{ fontSize: "1rem" }} variant="caption">
             Slippage {slippage}% limit
           </Typography>
-          <Typography sx={{ fontSize: "1rem" }} variant="caption">
-            ${displayPremiaWithSlippage}
-          </Typography>
+          <Tooltip title={`$${displayPremiaWithSlippage}`}>
+            <Typography sx={{ fontSize: "1rem" }} variant="caption">
+              ${displayPremiaWithSlippage.toFixed(2)}
+            </Typography>
+          </Tooltip>
         </Box>
       </Box>
       <Button disabled={!account} variant="contained" onClick={handleClick}>

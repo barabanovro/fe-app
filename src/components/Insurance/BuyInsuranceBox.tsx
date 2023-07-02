@@ -1,4 +1,4 @@
-import { CSSProperties, useState } from "react";
+import { useState } from "react";
 import { useAccount } from "../../hooks/useAccount";
 import { TokenKey, tokensList } from "../../tokens/tokens";
 import { useUserBalance } from "../../hooks/useUserBalance";
@@ -12,6 +12,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  Skeleton,
   TextField,
   Typography,
 } from "@mui/material";
@@ -35,8 +36,6 @@ import { ToastType } from "../../redux/reducers/ui";
 export const BuyInsuranceBox = () => {
   const account = useAccount();
   const balance = useUserBalance();
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currency, setCurrency] = useState<TokenKey>(TokenKey.ETH);
   const token = tokensList[currency];
   const displayBalance = balance
@@ -48,14 +47,20 @@ export const BuyInsuranceBox = () => {
     fetchOptions
   );
   const [currentStrike, setCurrentStrike] = useState<number>();
-  const [size, setSize] = useState<number>(
-    displayBalance ? parseFloat(displayBalance) : 0
-  );
-  const [textSize, setTextSize] = useState<string>(
-    displayBalance ? displayBalance : "0"
-  );
+  const [size, setSize] = useState<number>(0);
+  const [textSize, setTextSize] = useState<string>("0");
   const [interacted, setInteracted] = useState(false);
   const [expiry, setExpiry] = useState<number>();
+
+  if (valueInUsd === undefined || isLoading) {
+    return <LoadingAnimation />;
+  }
+
+  if (isError || !data) {
+    return (
+      <Typography>Something went wrong, please try again later</Typography>
+    );
+  }
 
   if (displayBalance && !interacted) {
     // if no interaction with input, set size to user balance
@@ -64,31 +69,11 @@ export const BuyInsuranceBox = () => {
     setInteracted(true);
   }
 
-  if (valueInUsd === undefined || isLoading) {
-    return <LoadingAnimation />;
-  }
-
-  if (isError || !data) {
-    return <Typography>Oh no :O</Typography>;
-  }
-
-  const balanceMessage = balance
-    ? `You currently have`
-    : "Getting your balance...";
-  const balanceDisplay = `${displayBalance} ${token.symbol}`;
-  const assetPriceMessage = `Current ${token.symbol} price`;
-  const assetPriceDisplay = `$${valueInUsd}`;
-
   const options = data.filter(
     // only Long Puts for the chosen currency
-    (o) => o.tokenPair.base.id === currency && o.isPut && o.isLong
+    (o) => o.tokenPair.base.id === currency && o.isPut && o.isLong && o.isFresh
   );
-  const rowSx: CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    flexFlow: "row",
-    gap: 4,
-  };
+
   const handleCurrencyChange = (event: SelectChangeEvent) => {
     setCurrency(event.target.value as TokenKey);
   };
@@ -107,51 +92,25 @@ export const BuyInsuranceBox = () => {
     }
   );
 
-  if (options.length === 0) {
-    // no options for the given currency
-    return (
-      <Box sx={{ display: "flex", flexFlow: "column", gap: 2 }}>
-        <Box sx={rowSx}>
-          <Typography>Select crypto asset to insure</Typography>
-          <FormControl size="small">
-            <InputLabel id="currency-select-label">Asset</InputLabel>
-            <Select
-              sx={{ px: 1 }}
-              labelId="currency-select-label"
-              id="currency-select"
-              value={currency}
-              label="Asset"
-              onChange={handleCurrencyChange}
-            >
-              <MenuItem value={TokenKey.ETH}>ETH</MenuItem>
-              <MenuItem disabled>More coming!</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-        <Typography>{balanceMessage}</Typography>
-        <Typography>{assetPriceMessage}</Typography>
-        <Typography>
-          We currently do not have any options that fit your criteria, please
-          check again later.
-        </Typography>
-      </Box>
-    );
-  }
-
-  const strikes = options
-    .map((o) => o.parsed.strikePrice)
-    .filter(uniquePrimitiveValues);
-
-  if (!currentStrike) {
-    setCurrentStrike(strikes[0]);
-  }
-
+  // show all expiries
   const expiries = options
-    .filter((o) => o.parsed.strikePrice === currentStrike)
-    .map((o) => o.parsed.maturity);
+    .map((o) => o.parsed.maturity)
+    .filter(uniquePrimitiveValues)
+    .sort();
 
   if (!expiry) {
     setExpiry(expiries[0]);
+  }
+
+  // show strikes for current expiry
+  const strikes = options
+    .filter((o) => o.parsed.maturity === expiry)
+    .map((o) => o.parsed.strikePrice)
+    .filter(uniquePrimitiveValues)
+    .sort();
+
+  if (!currentStrike || !strikes.includes(currentStrike)) {
+    setCurrentStrike(strikes[0]);
   }
 
   const pickedOption = options.find(
@@ -205,96 +164,119 @@ export const BuyInsuranceBox = () => {
               </FormControl>
             </td>
           </tr>
+          {account && (
+            <tr>
+              <td>
+                <Typography>
+                  {balance ? `You currently have` : "Getting your balance..."}
+                </Typography>
+              </td>
+              <td>
+                {}
+                <Typography>
+                  {balance ? `${displayBalance} ${token.symbol}` : <Skeleton />}
+                </Typography>
+              </td>
+            </tr>
+          )}
           <tr>
             <td>
-              <Typography>{balanceMessage}</Typography>
+              <Typography>
+                {valueInUsd
+                  ? `Current ${token.symbol} price`
+                  : `Getting ${token.symbol} price...`}
+              </Typography>
             </td>
             <td>
-              <Typography>{balanceDisplay}</Typography>
+              <Typography>
+                {valueInUsd ? `$${valueInUsd}` : <Skeleton />}
+              </Typography>
             </td>
           </tr>
-          <tr>
-            <td>
-              <Typography>{assetPriceMessage}</Typography>
-            </td>
-            <td>
-              <Typography>{assetPriceDisplay}</Typography>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <Typography>Select price to insure</Typography>
-            </td>
-            <td>
-              <FormControl size="small">
-                <InputLabel id="strike-select-label">Price</InputLabel>
-                <Select
-                  sx={{ px: 1 }}
-                  labelId="strike-select-label"
-                  id="strike-select"
-                  label="Insure price"
-                  value={"" + currentStrike}
-                  onChange={handleStrikeChange}
-                >
-                  {strikes.map((s) => (
-                    <MenuItem key={s} value={s}>
-                      ${s}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <Typography>Select expiry</Typography>
-            </td>
-            <td>
-              <FormControl size="small">
-                <InputLabel id="expiry-select-label">Expiry</InputLabel>
-                <Select
-                  sx={{ px: 1 }}
-                  labelId="expiry-select-label"
-                  id="expiry-select"
-                  label="Expiry"
-                  value={expiry ? expiry + "" : undefined}
-                  onChange={handleExpiryChange}
-                >
-                  {expiries.map((e, i) => (
-                    <MenuItem key={i} value={e}>
-                      {timestampToReadableDate(e * 1000)}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>{" "}
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <Typography>Select size to insure</Typography>
-            </td>
-            <td>
-              <TextField
-                id="outlined-number"
-                label="Size"
-                size="small"
-                value={textSize}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                inputProps={{
-                  inputMode: "decimal",
-                }}
-                onChange={handleSizeChange}
-              />{" "}
-            </td>
-          </tr>
+          {options.length > 0 && (
+            <>
+              <tr>
+                <td>
+                  <Typography>Select expiry</Typography>
+                </td>
+                <td>
+                  <FormControl size="small">
+                    <InputLabel id="expiry-select-label">Expiry</InputLabel>
+                    <Select
+                      sx={{ px: 1 }}
+                      labelId="expiry-select-label"
+                      id="expiry-select"
+                      label="Expiry"
+                      value={expiry ? expiry + "" : undefined}
+                      onChange={handleExpiryChange}
+                    >
+                      {expiries.map((e, i) => (
+                        <MenuItem key={i} value={e}>
+                          {timestampToReadableDate(e * 1000)}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>{" "}
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <Typography>Select price to insure</Typography>
+                </td>
+                <td>
+                  <FormControl size="small">
+                    <InputLabel id="strike-select-label">Price</InputLabel>
+                    <Select
+                      sx={{ px: 1 }}
+                      labelId="strike-select-label"
+                      id="strike-select"
+                      label="Insure price"
+                      value={"" + currentStrike}
+                      onChange={handleStrikeChange}
+                    >
+                      {strikes.map((s) => (
+                        <MenuItem key={s} value={s}>
+                          ${s}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <Typography>Select size to insure</Typography>
+                </td>
+                <td>
+                  <TextField
+                    id="outlined-number"
+                    label="Size"
+                    size="small"
+                    value={textSize}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    inputProps={{
+                      inputMode: "decimal",
+                    }}
+                    onChange={handleSizeChange}
+                  />
+                </td>
+              </tr>
+            </>
+          )}
         </tbody>
       </table>
 
+      {options.length === 0 && (
+        <Typography>
+          We currently do not have any available insurance, please try again
+          later
+        </Typography>
+      )}
       {!account && <Typography>Connect wallet to buy insurance</Typography>}
       <Button
-        disabled={!account}
+        disabled={!account || options.length === 0}
         variant="contained"
         onClick={handleButtonClick}
       >

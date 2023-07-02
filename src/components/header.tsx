@@ -10,6 +10,7 @@ import { useAccount } from "../hooks/useAccount";
 import { AccountInterface } from "starknet";
 import { standardiseAddress } from "../utils/utils";
 import { coreTeamAddresses } from "../constants/amm";
+import whitelist from "./Insurance/whitelist.json";
 
 type NavLinkProps = {
   title: string;
@@ -52,7 +53,9 @@ const navLink = (
   if (title === "Insurance") {
     if (
       !account ||
-      !coreTeamAddresses.includes(standardiseAddress(account.address))
+      ![...whitelist, ...coreTeamAddresses].includes(
+        standardiseAddress(account.address)
+      )
     ) {
       return null;
     }

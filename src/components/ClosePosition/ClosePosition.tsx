@@ -80,7 +80,7 @@ const Template = ({
       >
         <TextField
           id="close-position-input"
-          label="Amount"
+          label="Size"
           type="numeric"
           size="small"
           value={inputText}

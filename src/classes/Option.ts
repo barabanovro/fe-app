@@ -283,6 +283,14 @@ export class OptionWithPosition extends Option {
   get size(): number {
     return shortInteger(this.fullSize, this.tokenPair.base.decimals);
   }
+
+  get isInTheMoney(): Boolean {
+    return !!this.parsed.positionValue && this.isExpired;
+  }
+
+  get isOutOfTheMoney(): Boolean {
+    return !this.parsed.positionValue && this.isExpired;
+  }
 }
 
 export class OptionWithPremia extends Option {

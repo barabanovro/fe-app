@@ -5,6 +5,7 @@ import { QueryFunctionContext } from "react-query";
 import { getOptionsWithPositionOfUser } from "../../calls/getOptionsWithPosition";
 import { parseBatchOfOptions } from "../../utils/optionParsers/batch";
 import { parseOptionWithPosition } from "../../utils/optionParsers/parseOptionWithPosition";
+import BN from "bn.js";
 
 export const fetchPositions = async ({
   queryKey,
@@ -37,3 +38,19 @@ export const fetchPositions = async ({
     throw Error(typeof e === "string" ? e : "Failed to parse positions");
   }
 };
+
+export const mockFetchPositions = async (): Promise<OptionWithPosition[]> =>
+  fetch("http://localhost:3001/positions")
+    .then((res) => res.json())
+    .then((res) => {
+      if (res?.status !== "success" || !res?.data?.length) {
+        return [];
+      }
+      const options = parseBatchOfOptions(
+        res.data.map((v: string) => new BN(v)),
+        9,
+        parseOptionWithPosition
+      );
+
+      return options;
+    });

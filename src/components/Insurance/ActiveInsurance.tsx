@@ -1,24 +1,40 @@
 import { LoadingAnimation } from "../loading";
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { useQuery } from "react-query";
 import { QueryKeys } from "../../queries/keys";
 import { useAccount } from "../../hooks/useAccount";
 import { AccountInterface } from "starknet";
 import { fetchPositions } from "../PositionTable/fetchPositions";
 import { OptionWithPosition } from "../../classes/Option";
+import { openCloseOptionDialog, setCloseOption } from "../../redux/actions";
 
 const InsuranceDisplay = ({ option }: { option: OptionWithPosition }) => {
   const symbol = option.tokenPair.base.symbol;
-
+  const handleButtonClick = () => {
+    setCloseOption(option);
+    openCloseOptionDialog();
+  };
   return (
     <Box sx={{ display: "flex", flexFlow: "column" }}>
       <Typography variant="h6">
         {symbol} ${option.parsed.strikePrice}
       </Typography>
-      <Typography>
-        Insurance covers {option.size} {symbol} at price $
-        {option.parsed.strikePrice} and expires {option.dateRich}
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          flexFlow: "row",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        <Typography>
+          Insurance covers {option.size} {symbol} at price $
+          {option.parsed.strikePrice} and expires {option.dateRich}
+        </Typography>
+        <Button onClick={handleButtonClick} variant="contained">
+          Close
+        </Button>
+      </Box>
     </Box>
   );
 };
@@ -37,7 +53,7 @@ const WithAccount = ({ account }: { account: AccountInterface }) => {
     return <Typography>Oh no :O</Typography>;
   }
 
-  const insurance = data.filter((o) => o.isPut && o.isLong);
+  const insurance = data.filter((o) => o.isPut && o.isLong && o.isFresh);
 
   if (insurance.length === 0) {
     // no options for the given currency
@@ -67,7 +83,7 @@ const WithAccount = ({ account }: { account: AccountInterface }) => {
   );
 };
 
-export const ShowActiveInsurance = () => {
+export const ActiveInsurance = () => {
   const account = useAccount();
 
   if (!account) {

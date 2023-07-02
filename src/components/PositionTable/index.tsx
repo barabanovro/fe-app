@@ -89,13 +89,11 @@ const PositionsWithAddress = ({ address }: PropsAddress) => {
   );
 
   const inOptions = data.filter(
-    (option: OptionWithPosition) =>
-      !option.isFresh && !!option.parsed.positionValue
+    (option: OptionWithPosition) => option.isInTheMoney
   );
 
   const outOptions = data.filter(
-    (option: OptionWithPosition) =>
-      !option.isFresh && !option.parsed.positionValue
+    (option: OptionWithPosition) => option.isOutOfTheMoney
   );
 
   return (
