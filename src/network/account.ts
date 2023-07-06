@@ -51,16 +51,26 @@ export const connect = (
   fromLatest: boolean = false
 ) => {
   const sn = getStarknet();
-  sn.enable(wallet).then(() => {
+  sn.enable(wallet).then(async () => {
     if (!isConnectedWallet(wallet)) {
       return;
     }
     updateNetwork({ walletId: wallet.id as SupportedWalletIds });
     debug("Wallet connected", wallet);
 
-    const { chainId } = store.getState().network.network;
+    const network = store.getState().network.network;
 
-    if (chainId !== wallet.account.chainId) {
+    const accountChainId = await wallet.account.getChainId();
+
+    debug("Connecting wallet", {
+      walletNetworkName: wallet.chainId,
+      walletChainId: wallet.account.chainId,
+      appChainId: network.chainId,
+      appNetworkName: network.name,
+      accountChainId,
+    });
+
+    if (network.chainId !== accountChainId) {
       if (store.getState().network.network.name === NetworkName.Devnet) {
         // devnet - ignore network mismatch
         return;
