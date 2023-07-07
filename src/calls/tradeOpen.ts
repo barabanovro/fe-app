@@ -17,7 +17,7 @@ import LpAbi from "../abi/lptoken_abi.json";
 import { afterTransaction } from "../utils/blockchain";
 import { invalidatePositions } from "../queries/client";
 import { intToMath64x61 } from "../utils/units";
-import { TransactionActions } from "../redux/reducers/transactions";
+import { TransactionAction } from "../redux/reducers/transactions";
 import { ToastType } from "../redux/reducers/ui";
 
 export const approveAndTradeOpen = async (
@@ -98,7 +98,7 @@ export const approveAndTradeOpen = async (
 
   if (res?.transaction_hash) {
     const hash = res.transaction_hash;
-    addTx(hash, TransactionActions.TradeOpen);
+    addTx(hash, option.id, TransactionAction.TradeOpen);
     afterTransaction(
       hash,
       () => {

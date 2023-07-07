@@ -8,7 +8,7 @@ import { afterTransaction } from "../../utils/blockchain";
 import { isCall } from "../../utils/utils";
 import { addTx, markTxAsDone, showToast } from "../../redux/actions";
 import { ToastType } from "../../redux/reducers/ui";
-import { TransactionActions } from "../../redux/reducers/transactions";
+import { TransactionAction } from "../../redux/reducers/transactions";
 
 export const withdrawCall = async (
   account: AccountInterface,
@@ -47,7 +47,8 @@ export const withdrawCall = async (
 
   if (res?.transaction_hash) {
     const hash = res.transaction_hash;
-    addTx(hash, TransactionActions.Withdraw);
+    // TODO: add proper id per pool
+    addTx(hash, String(type), TransactionAction.Withdraw);
     afterTransaction(res.transaction_hash, () => {
       invalidateStake();
       setProcessing(false);

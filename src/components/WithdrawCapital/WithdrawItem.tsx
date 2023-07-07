@@ -18,12 +18,16 @@ import { isCall } from "../../utils/utils";
 import { POOL_NAMES } from "../../constants/texts";
 import { showToast } from "../../redux/actions";
 import { ToastType } from "../../redux/reducers/ui";
+import { useTxPending } from "../../hooks/useRecentTxs";
+import { TransactionAction } from "../../redux/reducers/transactions";
 
 interface Props extends UserPoolDisplayData {
   account: AccountInterface;
 }
 
 export const WithdrawItem = ({ account, value, fullSize, type }: Props) => {
+  // TODO: use proper pool id
+  const txPending = useTxPending(String(type), TransactionAction.Withdraw);
   const [amount, setAmount] = useState<number>(0);
   const [text, setText] = useState<string>("0");
   const [processing, setProcessing] = useState<boolean>(false);
@@ -85,9 +89,9 @@ export const WithdrawItem = ({ account, value, fullSize, type }: Props) => {
           disableElevation
           variant="contained"
           aria-label="Disabled elevation buttons"
-          disabled={processing}
+          disabled={processing || txPending}
         >
-          {processing ? (
+          {processing || txPending ? (
             <Button>Processing...</Button>
           ) : (
             <>

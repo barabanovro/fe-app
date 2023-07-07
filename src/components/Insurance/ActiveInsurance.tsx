@@ -7,8 +7,11 @@ import { AccountInterface } from "starknet";
 import { fetchPositions } from "../PositionTable/fetchPositions";
 import { OptionWithPosition } from "../../classes/Option";
 import { openCloseOptionDialog, setCloseOption } from "../../redux/actions";
+import { useTxPending } from "../../hooks/useRecentTxs";
+import { TransactionAction } from "../../redux/reducers/transactions";
 
 const InsuranceDisplay = ({ option }: { option: OptionWithPosition }) => {
+  const txPending = useTxPending(option.id, TransactionAction.TradeClose);
   const symbol = option.tokenPair.base.symbol;
   const handleButtonClick = () => {
     setCloseOption(option);
@@ -31,8 +34,12 @@ const InsuranceDisplay = ({ option }: { option: OptionWithPosition }) => {
           Insurance covers {option.size} {symbol} at price $
           {option.parsed.strikePrice} and expires {option.dateRich}
         </Typography>
-        <Button onClick={handleButtonClick} variant="contained">
-          Close
+        <Button
+          disabled={txPending}
+          onClick={handleButtonClick}
+          variant="contained"
+        >
+          {txPending ? "Processing..." : "Close"}
         </Button>
       </Box>
     </Box>

@@ -115,7 +115,12 @@ export const RecentTransaction = () => {
 
   return (
     <Box>
-      <Stack>
+      <Stack
+        sx={{
+          maxHeight: "60vh",
+          overflowY: "auto",
+        }}
+      >
         {txs.map((tx, i) => (
           <Tx tx={tx} key={i} />
         ))}

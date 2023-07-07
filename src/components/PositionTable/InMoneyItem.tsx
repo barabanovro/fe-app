@@ -5,38 +5,36 @@ import { debug } from "../../utils/debugger";
 import { tradeSettle } from "../../calls/tradeSettle";
 import { invalidatePositions } from "../../queries/client";
 import { afterTransaction } from "../../utils/blockchain";
-import { useState } from "react";
 import { useAccount } from "../../hooks/useAccount";
 import { showToast } from "../../redux/actions";
 import { ToastType } from "../../redux/reducers/ui";
+import { useTxPending } from "../../hooks/useRecentTxs";
+import { TransactionAction } from "../../redux/reducers/transactions";
 
 type Props = {
   option: OptionWithPosition;
 };
 
 export const InMoneyItem = ({ option }: Props) => {
+  const txPending = useTxPending(option.id, TransactionAction.Settle);
   const account = useAccount();
-  const [processing, setProcessing] = useState<boolean>(false);
 
   const handleSettle = () => {
     if (!account || !option?.raw?.position_size) {
       debug("Could not trade close", { account, raw: option?.raw });
       return;
     }
-    setProcessing(true);
 
     tradeSettle(account, option)
       .then((res) => {
         if (res?.transaction_hash) {
           afterTransaction(res.transaction_hash, () => {
             invalidatePositions();
-            setProcessing(false);
             showToast("Successfully settled position", ToastType.Success);
           });
         }
       })
       .catch(() => {
-        setProcessing(false);
         showToast("Successfully settled position", ToastType.Error);
       });
   };
@@ -62,12 +60,8 @@ export const InMoneyItem = ({ option }: Props) => {
         </Tooltip>
       </TableCell>
       <TableCell align="right">
-        <Button
-          disabled={processing}
-          variant="contained"
-          onClick={handleSettle}
-        >
-          {processing ? "Processing..." : "Settle"}
+        <Button disabled={txPending} variant="contained" onClick={handleSettle}>
+          {txPending ? "Processing..." : "Settle"}
         </Button>
       </TableCell>
     </TableRow>

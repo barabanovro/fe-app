@@ -5,7 +5,7 @@ import LpAbi from "../abi/lptoken_abi.json";
 import AmmAbi from "../abi/amm_abi.json";
 import { afterTransaction } from "../utils/blockchain";
 import { addTx, markTxAsDone, markTxAsFailed } from "../redux/actions";
-import { TransactionActions } from "../redux/reducers/transactions";
+import { TransactionAction } from "../redux/reducers/transactions";
 import { Pool } from "../classes/Pool";
 
 export const depositLiquidity = async (
@@ -51,7 +51,7 @@ export const depositLiquidity = async (
 
   if (res?.transaction_hash) {
     const hash = res.transaction_hash;
-    addTx(hash, TransactionActions.Stake);
+    addTx(hash, pool.id, TransactionAction.Stake);
     afterTransaction(
       res.transaction_hash,
       () => {

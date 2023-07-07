@@ -16,6 +16,8 @@ import { Pool } from "../../classes/Pool";
 import { hexToBN } from "../../utils/utils";
 import { intToDecimal } from "../../utils/units";
 import { BASE_DIGITS } from "../../constants/amm";
+import { useTxPending } from "../../hooks/useRecentTxs";
+import { TransactionAction } from "../../redux/reducers/transactions";
 
 type Props = {
   account: AccountInterface | undefined;
@@ -59,6 +61,7 @@ const getYieldSinceLaunch = async (
 };
 
 export const StakeCapitalItem = ({ account, pool }: Props) => {
+  const txPending = useTxPending(pool.id, TransactionAction.Stake);
   const [amount, setAmount] = useState<number>(0);
   const [text, setText] = useState<string>("0");
   const [loading, setLoading] = useState<boolean>(false);
@@ -129,11 +132,15 @@ export const StakeCapitalItem = ({ account, pool }: Props) => {
       </TableCell>
       <TableCell align="right">
         <Button
-          disabled={loading || !account}
+          disabled={loading || !account || txPending}
           variant="contained"
           onClick={() => handleStake(account!, amount, pool, setLoading)}
         >
-          {loading ? "Processing..." : account ? "Stake" : "Connect wallet"}
+          {loading || txPending
+            ? "Processing..."
+            : account
+            ? "Stake"
+            : "Connect wallet"}
         </Button>
         <Tooltip title="Stake from L1 directly to our liquidity pool - requires MetaMask">
           <Button sx={{ ml: 1 }} variant="contained" onClick={handleWidoClick}>

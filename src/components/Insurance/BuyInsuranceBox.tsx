@@ -32,6 +32,41 @@ import {
   showToast,
 } from "../../redux/actions";
 import { ToastType } from "../../redux/reducers/ui";
+import { Option } from "../../classes/Option";
+import { useTxPending } from "../../hooks/useRecentTxs";
+import { TransactionAction } from "../../redux/reducers/transactions";
+
+type BuyButtonProps = {
+  option: Option;
+  size: number;
+};
+
+const BuyInsuranceButton = ({ option, size }: BuyButtonProps) => {
+  const txPending = useTxPending(option.id, TransactionAction.TradeOpen);
+  const handleButtonClick = () => {
+    if (size === 0) {
+      showToast("Please select size greater than 0", ToastType.Warn);
+      return;
+    }
+    if (!option) {
+      showToast("Select an insurance first", ToastType.Warn);
+      return;
+    }
+    debug("Buying this option", option, "with size", size);
+    setBuyInsuranceModal({ option: option, size });
+    openBuyInsuranceDialog();
+  };
+
+  return (
+    <Button
+      disabled={txPending}
+      variant="contained"
+      onClick={handleButtonClick}
+    >
+      {txPending ? "Processing" : "Buy Insurance"}
+    </Button>
+  );
+};
 
 export const BuyInsuranceBox = () => {
   const account = useAccount();
@@ -117,20 +152,6 @@ export const BuyInsuranceBox = () => {
     (o) =>
       o.parsed.maturity === expiry && o.parsed.strikePrice === currentStrike
   )!;
-
-  const handleButtonClick = () => {
-    if (size === 0) {
-      showToast("Please select size greater than 0", ToastType.Warn);
-      return;
-    }
-    if (!pickedOption) {
-      showToast("Select an insurance first", ToastType.Warn);
-      return;
-    }
-    debug("Buying this option", pickedOption, "with size", size);
-    setBuyInsuranceModal({ option: pickedOption, size });
-    openBuyInsuranceDialog();
-  };
 
   return (
     <Box
@@ -275,13 +296,9 @@ export const BuyInsuranceBox = () => {
         </Typography>
       )}
       {!account && <Typography>Connect wallet to buy insurance</Typography>}
-      <Button
-        disabled={!account || options.length === 0}
-        variant="contained"
-        onClick={handleButtonClick}
-      >
-        Buy Insurance
-      </Button>
+      {options.length > 0 && account && (
+        <BuyInsuranceButton option={pickedOption} size={size} />
+      )}
     </Box>
   );
 };

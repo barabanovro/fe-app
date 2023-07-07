@@ -16,7 +16,7 @@ import {
   addTxReducer,
   setTxStatusReducer,
   Transaction,
-  TransactionActions,
+  TransactionAction,
   TransactionStatus,
 } from "./reducers/transactions";
 import { BuyInsuranceModalData } from "../components/Insurance/BuyInsuranceModal";
@@ -82,8 +82,9 @@ export const showToast = (message: string, type: ToastType = ToastType.Info) =>
 
 export const hideToast = () => store.dispatch(setToastState({ open: false }));
 
-export const addTx = (hash: string, action: TransactionActions) => {
+export const addTx = (hash: string, id: string, action: TransactionAction) => {
   const tx: Transaction = {
+    id,
     hash,
     action,
     status: TransactionStatus.Pending,

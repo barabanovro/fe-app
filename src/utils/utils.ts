@@ -7,8 +7,6 @@ import {
   getTokenAddresses,
   API_URL_MAINNET,
   API_URL_TESTNET,
-  DEV_API_URL_MAINNET,
-  DEV_API_URL_TESTNET,
 } from "../constants/amm";
 import { Theme } from "@mui/system";
 import { ThemeVariants } from "../style/themes";

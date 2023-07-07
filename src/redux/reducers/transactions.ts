@@ -1,12 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { constants } from "starknet";
 
-export enum TransactionActions {
+export enum TransactionAction {
   TradeOpen = "TradeOpen",
   TradeClose = "TradeClose",
   Stake = "Stake",
   Withdraw = "Withdraw",
   Settle = "Settle",
+  ClaimAirdrop = "ClaimAirdrop",
+  Vote = "Vote",
 }
 
 export enum TransactionStatus {
@@ -16,8 +18,9 @@ export enum TransactionStatus {
 }
 
 export interface Transaction {
-  action: TransactionActions;
+  action: TransactionAction;
   hash: string;
+  id: string;
   timestamp: number;
   finishedTimestamp?: number;
   status: TransactionStatus;
@@ -25,7 +28,7 @@ export interface Transaction {
 }
 
 export const txs = createSlice({
-  name: "ui",
+  name: "txs",
   initialState: [] as Transaction[],
   reducers: {
     addTxReducer: (state, action: { payload: Transaction }) => {

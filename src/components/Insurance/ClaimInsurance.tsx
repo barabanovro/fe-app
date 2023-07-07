@@ -7,6 +7,8 @@ import { AccountInterface } from "starknet";
 import { fetchPositions } from "../PositionTable/fetchPositions";
 import { OptionWithPosition } from "../../classes/Option";
 import { tradeSettle } from "../../calls/tradeSettle";
+import { useTxPending } from "../../hooks/useRecentTxs";
+import { TransactionAction } from "../../redux/reducers/transactions";
 
 const ClaimItem = ({
   option,
@@ -15,6 +17,7 @@ const ClaimItem = ({
   option: OptionWithPosition;
   account: AccountInterface;
 }) => {
+  const txPending = useTxPending(option.id, TransactionAction.Settle);
   const symbol = option.tokenPair.base.symbol;
 
   const handleButtonClick = () => tradeSettle(account, option);
@@ -35,8 +38,12 @@ const ClaimItem = ({
         <Typography>
           You are eligible to claim ${option.parsed.positionValue.toFixed(4)}
         </Typography>
-        <Button onClick={handleButtonClick} variant="contained">
-          Claim
+        <Button
+          onClick={handleButtonClick}
+          variant="contained"
+          disabled={txPending}
+        >
+          {txPending ? "Processing..." : "Claim"}
         </Button>
       </Box>
     </Box>

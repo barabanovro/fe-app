@@ -19,7 +19,7 @@ export class Pool {
   public raw: RawPool;
   public parsed: ParsedPool;
   public tokenPair: TokenPair;
-  protected id: string;
+  public id: string;
 
   constructor(props: Props) {
     if ("raw" in props) {

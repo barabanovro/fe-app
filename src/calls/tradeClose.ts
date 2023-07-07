@@ -14,7 +14,7 @@ import {
   markTxAsFailed,
   showToast,
 } from "../redux/actions";
-import { TransactionActions } from "../redux/reducers/transactions";
+import { TransactionAction } from "../redux/reducers/transactions";
 import { ToastType } from "../redux/reducers/ui";
 
 export const tradeClose = async (
@@ -48,7 +48,7 @@ export const tradeClose = async (
     const res = await account.execute(call, [AmmAbi]);
     if (res?.transaction_hash) {
       const hash = res.transaction_hash;
-      addTx(hash, TransactionActions.TradeClose);
+      addTx(hash, option.id, TransactionAction.TradeClose);
       afterTransaction(
         hash,
         () => {

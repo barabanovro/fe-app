@@ -6,7 +6,7 @@ import { debug, LogTypes } from "../utils/debugger";
 import { invalidatePositions } from "../queries/client";
 import { afterTransaction } from "../utils/blockchain";
 import { addTx, markTxAsDone, markTxAsFailed } from "../redux/actions";
-import { TransactionActions } from "../redux/reducers/transactions";
+import { TransactionAction } from "../redux/reducers/transactions";
 
 export const tradeSettle = async (
   account: AccountInterface,
@@ -22,7 +22,7 @@ export const tradeSettle = async (
     const res = await account.execute(call, [AmmAbi]);
     if (res?.transaction_hash) {
       const hash = res.transaction_hash;
-      addTx(hash, TransactionActions.Settle);
+      addTx(hash, option.id, TransactionAction.Settle);
       afterTransaction(
         res.transaction_hash,
         () => {

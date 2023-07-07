@@ -2,12 +2,15 @@ import { OptionWithPosition } from "../../classes/Option";
 import { timestampToReadableDate } from "../../utils/utils";
 import { Button, TableCell, TableRow, Tooltip } from "@mui/material";
 import { openCloseOptionDialog, setCloseOption } from "../../redux/actions";
+import { useTxPending } from "../../hooks/useRecentTxs";
+import { TransactionAction } from "../../redux/reducers/transactions";
 
 type Props = {
   option: OptionWithPosition;
 };
 
 export const LiveItem = ({ option }: Props) => {
+  const txPending = useTxPending(option.id, TransactionAction.TradeClose);
   const { strikePrice, maturity, positionSize, positionValue } = option.parsed;
   const msMaturity = maturity * 1000;
 
@@ -41,8 +44,8 @@ export const LiveItem = ({ option }: Props) => {
         </Tooltip>
       </TableCell>
       <TableCell align="right">
-        <Button variant="contained" onClick={handleClick}>
-          Close
+        <Button variant="contained" onClick={handleClick} disabled={txPending}>
+          {txPending ? "Processing..." : "Close"}
         </Button>
       </TableCell>
     </TableRow>
