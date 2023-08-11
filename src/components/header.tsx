@@ -8,9 +8,6 @@ import { NetworkSwitch } from "./networkSwitch";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useAccount } from "../hooks/useAccount";
 import { AccountInterface } from "starknet";
-import { standardiseAddress } from "../utils/utils";
-import { coreTeamAddresses } from "../constants/amm";
-import whitelist from "./Insurance/whitelist.json";
 
 type NavLinkProps = {
   title: string;
@@ -48,26 +45,13 @@ const navLink = (
   { title, link }: NavLinkProps,
   i: number,
   account: AccountInterface | undefined
-): ReactNode => {
-  // show "Insurance" only to whitelisted users
-  if (title === "Insurance") {
-    if (
-      !account ||
-      ![...whitelist, ...coreTeamAddresses].includes(
-        standardiseAddress(account.address)
-      )
-    ) {
-      return null;
-    }
-  }
-  return (
-    <RouterLink style={{ textDecoration: "none" }} to={link} key={i}>
-      <Button sx={{ color: "text.primary", my: 1, mx: 1.5 }} key={i}>
-        {title}
-      </Button>
-    </RouterLink>
-  );
-};
+): ReactNode => (
+  <RouterLink style={{ textDecoration: "none" }} to={link} key={i}>
+    <Button sx={{ color: "text.primary", my: 1, mx: 1.5 }} key={i}>
+      {title}
+    </Button>
+  </RouterLink>
+);
 
 export const Header = () => {
   const account = useAccount();
