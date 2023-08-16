@@ -22,7 +22,7 @@
     "recharts": "^2.1.16",
     "redux": "^4.2.0",
     "starknet": "^4.21.0",
-    "wido-widget": "^1.0.4"
+    "wido-widget": "^1.5.3"
   },
   "scripts": {
     "start": "GENERATE_SOURCEMAP=false react-scripts start",

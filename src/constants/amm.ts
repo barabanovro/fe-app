@@ -98,6 +98,9 @@ export const enum AMM_METHODS {
   GET_USER_POOL_INFOS = "get_user_pool_infos",
   WITHDRAW_LIQUIDITY = "withdraw_liquidity",
   GET_TOTAL_PREMIA = "get_total_premia",
+  GET_MAX_LPOOL_BALANCE = "get_max_lpool_balance",
+  GET_LOOP_BALANCE = "get_lpool_balance",
+  GET_UNDERLYING_FOR_LPTOKENS = "get_underlying_for_lptokens",
 }
 
 export const coreTeamAddresses = [

@@ -6,9 +6,19 @@ import { useTheme } from "@mui/material";
 import { store } from "../../redux/store";
 import { NetworkName } from "../../types/network";
 import { openMetamaskMissingDialog } from "../../redux/actions";
-import { getTokenAddresses } from "../../constants/amm";
+import { ETH_DIGITS, USD_DIGITS, getTokenAddresses } from "../../constants/amm";
 import { stripZerosFromAddress } from "../../utils/utils";
 import { openWalletConnectDialog } from "../../redux/actions";
+import { QuoteResult, QuoteRequest, quote } from "wido";
+import { poolLimit } from "../../calls/poolLimit";
+import BN from "bn.js";
+import { getLptokenValue } from "../../calls/getLptokenValue";
+import { shortInteger } from "../../utils/computations";
+
+// const TO_TOKEN_PUT =
+//   "0x18a6abca394bd5f822cfa5f88783c01b13e593d1603e7b41b00d31d2ea4827a";
+const TO_TOKEN_CALL =
+  "0x7aba50fdb4e024c1ba63e2c60565d0fd32566ff4b18aa5818fc80c30e749024";
 
 const handleConnectWalletClick = (chainId: number) => {
   if (chainId === 1) {
@@ -23,6 +33,41 @@ const handleConnectWalletClick = (chainId: number) => {
   if (chainId === 15366) {
     openWalletConnectDialog();
   }
+};
+
+const quoteApiWithLimitCheck = async (
+  request: QuoteRequest
+): Promise<QuoteResult> => {
+  const [stakable, quoteResponse, lptokenValue] = await Promise.all([
+    poolLimit(request.toToken),
+    quote(request),
+    getLptokenValue(request.toToken),
+  ]).catch((e) => {
+    throw Error("Wido quote failed", e);
+  });
+
+  const decimals = request.toToken === TO_TOKEN_CALL ? ETH_DIGITS : USD_DIGITS;
+  const stakingLptoken = new BN(quoteResponse.toTokenAmount || "0");
+  const staking = shortInteger(
+    stakingLptoken.mul(lptokenValue.base).toString(10),
+    ETH_DIGITS + decimals // ETH digits for LPTOKEN, decimals for pool currency
+  );
+
+  if (stakable.converted < staking) {
+    debug("Wido staking, pool is almost full", {
+      stakable,
+      staking,
+      request,
+      quoteResponse,
+    });
+    throw Error(
+      `Liquidity pool is almost full!\nOnly ${
+        Math.round(stakable.converted * 1000) / 1000
+      } ${stakable.symbol} can be staked`
+    );
+  }
+
+  return quoteResponse;
 };
 
 const getTokens = () => {
@@ -128,6 +173,7 @@ const WidoWidgetWrapper = (pool: "call" | "put") => {
       presetToToken={presetToToken}
       theme={widoTheme}
       partner={carmineAddress}
+      quoteApi={quoteApiWithLimitCheck}
     />
   );
 };
