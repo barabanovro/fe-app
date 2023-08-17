@@ -46,6 +46,12 @@ const quoteApiWithLimitCheck = async (
     throw Error("Wido quote failed", e);
   });
 
+  if (stakable.converted === 0) {
+    throw Error(
+      "This liquidity pool is completely full!\nWe will be raising the limit soon"
+    );
+  }
+
   const decimals = request.toToken === TO_TOKEN_CALL ? ETH_DIGITS : USD_DIGITS;
   const stakingLptoken = new BN(quoteResponse.toTokenAmount || "0");
   const staking = shortInteger(
