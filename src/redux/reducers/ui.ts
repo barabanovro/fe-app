@@ -12,6 +12,7 @@ export enum DialogContentElem {
   CallWido = "CallWido",
   PutWido = "PutWido",
   MetamaskMissing = "MetamaskMissing",
+  NotEnoughUnlocked = "NotEnoughUnlocked",
 }
 
 export enum ToastType {

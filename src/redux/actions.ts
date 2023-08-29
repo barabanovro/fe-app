@@ -69,6 +69,9 @@ export const openPutWidoDialog = () =>
 export const openMetamaskMissingDialog = () =>
   openDialogWithContent(DialogContentElem.MetamaskMissing);
 
+export const openNotEnoughUnlockedCapitalDialog = () =>
+  openDialogWithContent(DialogContentElem.NotEnoughUnlocked);
+
 export const setSlippage = (n: number) => store.dispatch(setSlippageState(n));
 
 export const setCloseOption = (option: OptionWithPosition) =>

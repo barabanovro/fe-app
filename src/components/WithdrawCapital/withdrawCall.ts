@@ -6,9 +6,16 @@ import AmmAbi from "../../abi/amm_abi.json";
 import { invalidateStake } from "../../queries/client";
 import { afterTransaction } from "../../utils/blockchain";
 import { isCall } from "../../utils/utils";
-import { addTx, markTxAsDone, showToast } from "../../redux/actions";
+import {
+  addTx,
+  markTxAsDone,
+  openNotEnoughUnlockedCapitalDialog,
+  showToast,
+} from "../../redux/actions";
 import { ToastType } from "../../redux/reducers/ui";
 import { TransactionAction } from "../../redux/reducers/transactions";
+import { getUnlockedCapital } from "../../calls/getUnlockedCapital";
+import BN from "bn.js";
 
 export const withdrawCall = async (
   account: AccountInterface,
@@ -17,14 +24,41 @@ export const withdrawCall = async (
   size: string
 ) => {
   setProcessing(true);
-  const { ETH_ADDRESS, USD_ADDRESS, MAIN_CONTRACT_ADDRESS } =
-    getTokenAddresses();
+  const {
+    ETH_ADDRESS,
+    USD_ADDRESS,
+    MAIN_CONTRACT_ADDRESS,
+    LPTOKEN_CONTRACT_ADDRESS,
+    LPTOKEN_CONTRACT_ADDRESS_PUT,
+  } = getTokenAddresses();
 
   if (!size) {
     return;
   }
 
   const call = isCall(type);
+
+  const unlocked = await getUnlockedCapital(
+    call ? LPTOKEN_CONTRACT_ADDRESS : LPTOKEN_CONTRACT_ADDRESS_PUT
+  ).catch(() => {
+    return undefined;
+  });
+
+  if (unlocked === undefined) {
+    setProcessing(false);
+    return;
+  }
+
+  debug({ unlocked, size });
+
+  // if withdrawing more than unlocked
+  // show dialog and stop transaction
+  if (new BN(size).gt(unlocked)) {
+    debug("Withdrawing more than unlocked");
+    openNotEnoughUnlockedCapitalDialog();
+    setProcessing(false);
+    return;
+  }
 
   const calldata = [
     call ? ETH_ADDRESS : USD_ADDRESS,

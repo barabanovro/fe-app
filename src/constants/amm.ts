@@ -101,6 +101,7 @@ export const enum AMM_METHODS {
   GET_MAX_LPOOL_BALANCE = "get_max_lpool_balance",
   GET_LOOP_BALANCE = "get_lpool_balance",
   GET_UNDERLYING_FOR_LPTOKENS = "get_underlying_for_lptokens",
+  GET_UNLOCKED_CAPITAL = "get_unlocked_capital",
 }
 
 export const coreTeamAddresses = [

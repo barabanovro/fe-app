@@ -13,11 +13,11 @@ import { handleStake } from "./handleStake";
 import { handleNumericChangeFactory } from "../../utils/inputHandling";
 import { openCallWidoDialog, openPutWidoDialog } from "../../redux/actions";
 import { Pool } from "../../classes/Pool";
-import { hexToBN } from "../../utils/utils";
 import { intToDecimal } from "../../utils/units";
 import { BASE_DIGITS } from "../../constants/amm";
 import { useTxPending } from "../../hooks/useRecentTxs";
 import { TransactionAction } from "../../redux/reducers/transactions";
+import { getPoolState } from "../../calls/getPoolState";
 
 type Props = {
   account: AccountInterface | undefined;
@@ -39,25 +39,18 @@ const getYieldSinceLaunch = async (
   setYieldSinceLaunch: (n: number) => void,
   pool: Pool
 ) => {
-  const poolId = pool.isCall ? "eth-usdc-call" : "eth-usdc-put";
-  fetch(`https://api.carmine.finance/api/v1/mainnet/${poolId}/state`)
-    .then((response) => response.json())
-    .then((result) => {
-      if (result && result.status === "success") {
-        const { lp_token_value, timestamp } = result.data;
-        const lpValue = intToDecimal(
-          hexToBN(lp_token_value).toString(10),
-          BASE_DIGITS
-        );
-        const MAINNET_LAUNCH_TIMESTAMP = 1680864820;
-        const YEAR_SECONDS = 31536000;
-        const secondsSinceLaunch = timestamp - MAINNET_LAUNCH_TIMESTAMP;
-        const yearFraction = YEAR_SECONDS / secondsSinceLaunch;
-        const apySinceLaunch = Math.pow(lpValue, yearFraction);
+  const state = await getPoolState(
+    pool.isCall ? "eth-usdc-call" : "eth-usdc-put"
+  );
+  const { lp_token_value, timestamp } = state;
+  const lpValue = intToDecimal(lp_token_value.toString(10), BASE_DIGITS);
+  const MAINNET_LAUNCH_TIMESTAMP = 1680864820;
+  const YEAR_SECONDS = 31536000;
+  const secondsSinceLaunch = timestamp - MAINNET_LAUNCH_TIMESTAMP;
+  const yearFraction = YEAR_SECONDS / secondsSinceLaunch;
+  const apySinceLaunch = Math.pow(lpValue, yearFraction);
 
-        setYieldSinceLaunch((apySinceLaunch - 1) * 100);
-      }
-    });
+  setYieldSinceLaunch((apySinceLaunch - 1) * 100);
 };
 
 export const StakeCapitalItem = ({ account, pool }: Props) => {

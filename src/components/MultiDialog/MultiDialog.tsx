@@ -10,7 +10,7 @@ import {
   IconButton,
   Link,
 } from "@mui/material";
-import { isDarkTheme } from "../../utils/utils";
+import { isDarkTheme, timestampToReadableDate } from "../../utils/utils";
 import { useDialog } from "../../hooks/useDialog";
 import { closeDialog } from "../../redux/actions";
 import { DialogContentElem } from "../../redux/reducers/ui";
@@ -60,6 +60,36 @@ const MetamaskMissing = () => (
           metamask.io
         </Link>
         .
+      </DialogContentText>
+    </DialogContent>
+    <DialogActions>
+      <Button variant="contained" onClick={closeDialog} autoFocus>
+        Close
+      </Button>
+    </DialogActions>
+  </>
+);
+
+const getNextFridayMidnightUTC = (): string => {
+  const today = new Date();
+  const currentDay = today.getUTCDay();
+  const daysUntilFriday = (5 - currentDay + 7) % 7; // Calculate days until next Friday
+  const nextFriday = new Date(today);
+  nextFriday.setUTCDate(today.getUTCDate() + daysUntilFriday);
+  nextFriday.setUTCHours(0, 0, 0, 0); // Set to midnight UTC
+  return timestampToReadableDate(nextFriday.getTime());
+};
+
+const NotEnoughUnlocked = () => (
+  <>
+    <DialogTitle id="alert-dialog-title">
+      Not Enough Unlocked Capital
+    </DialogTitle>
+    <DialogContent>
+      <DialogContentText id="alert-dialog-description">
+        Unfortunatelly, there is not enough unlocked capital in the AMM. Please
+        try again after <strong>{getNextFridayMidnightUTC()}</strong>, when
+        options expire and more capital will be unlocked.
       </DialogContentText>
     </DialogContent>
     <DialogActions>
@@ -171,6 +201,11 @@ export const MultiDialog = () => {
       {dialogContent === DialogContentElem.MetamaskMissing && (
         <Border>
           <MetamaskMissing />
+        </Border>
+      )}
+      {dialogContent === DialogContentElem.NotEnoughUnlocked && (
+        <Border>
+          <NotEnoughUnlocked />
         </Border>
       )}
     </Dialog>
