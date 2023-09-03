@@ -103,10 +103,22 @@ export const StakeCapitalItem = ({ account, pool }: Props) => {
         <Typography>{pool.name}</Typography>
       </TableCell>
       <TableCell>
-        <Typography sx={yslSx}>{displayYieldSinceLaunch}</Typography>
+        {pool.isPut ? (
+          <Typography sx={{ ...yslSx, color: theme.palette.text.primary }}>
+            --
+          </Typography>
+        ) : (
+          <Typography sx={yslSx}>{displayYieldSinceLaunch}</Typography>
+        )}
       </TableCell>
       <TableCell>
-        <Typography sx={apySx}>{displayApy}</Typography>
+        {pool.isPut ? (
+          <Typography sx={{ ...yslSx, color: theme.palette.text.primary }}>
+            --
+          </Typography>
+        ) : (
+          <Typography sx={apySx}>{displayApy}</Typography>
+        )}
       </TableCell>
       <TableCell sx={{ minWidth: "100px" }} align="center">
         <TextField
