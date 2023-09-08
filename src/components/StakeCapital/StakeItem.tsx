@@ -97,27 +97,34 @@ export const StakeCapitalItem = ({ account, pool }: Props) => {
     pool.isCall ? openCallWidoDialog() : openPutWidoDialog();
   };
 
+  const showPutSinceLaunch = true;
+  const showPutLastWeek = false;
+  const showCallSinceLaunch = true;
+  const showCallLastWeek = true;
+
   return (
     <TableRow>
       <TableCell>
         <Typography>{pool.name}</Typography>
       </TableCell>
       <TableCell>
-        {pool.isPut ? (
+        {(pool.isPut && showPutSinceLaunch) ||
+        (pool.isCall && showCallSinceLaunch) ? (
+          <Typography sx={yslSx}>{displayYieldSinceLaunch}</Typography>
+        ) : (
           <Typography sx={{ ...yslSx, color: theme.palette.text.primary }}>
             --
           </Typography>
-        ) : (
-          <Typography sx={yslSx}>{displayYieldSinceLaunch}</Typography>
         )}
       </TableCell>
       <TableCell>
-        {pool.isPut ? (
+        {(pool.isPut && showPutLastWeek) ||
+        (pool.isCall && showCallLastWeek) ? (
+          <Typography sx={apySx}>{displayApy}</Typography>
+        ) : (
           <Typography sx={{ ...yslSx, color: theme.palette.text.primary }}>
             --
           </Typography>
-        ) : (
-          <Typography sx={apySx}>{displayApy}</Typography>
         )}
       </TableCell>
       <TableCell sx={{ minWidth: "100px" }} align="center">
