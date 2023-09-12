@@ -11,8 +11,10 @@ export const getNonExpiredOptions = async (): Promise<OptionWithPremia[]> =>
       if (res?.status !== "success" || !res?.data?.length) {
         return [];
       }
+      const bnArr = res.data.map((v: string) => new BN(v.slice(2), 16));
+
       const optionsWithPremia = parseBatchOfOptions(
-        res.data.map((v: string) => new BN(v)),
+        bnArr,
         7,
         parseNonExpiredOption
       );
