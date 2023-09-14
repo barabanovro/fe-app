@@ -98,7 +98,7 @@ export const StakeCapitalItem = ({ account, pool }: Props) => {
   };
 
   const showPutSinceLaunch = true;
-  const showPutLastWeek = false;
+  const showPutLastWeek = true;
   const showCallSinceLaunch = true;
   const showCallLastWeek = true;
 
