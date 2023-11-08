@@ -26,7 +26,6 @@ export const networkProviderOptionsMap = new Map<NetworkName, ProviderOptions>([
     {
       rpc: {
         nodeUrl: "https://api.carmine.finance/api/v1/mainnet/call",
-        chainId: constants.StarknetChainId.MAINNET,
       },
     },
   ],
