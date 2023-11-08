@@ -24,8 +24,9 @@ export const networkProviderOptionsMap = new Map<NetworkName, ProviderOptions>([
   [
     NetworkName.Mainnet,
     {
-      sequencer: {
-        network: "mainnet-alpha",
+      rpc: {
+        nodeUrl: "https://api.carmine.finance/api/v1/mainnet/call",
+        chainId: constants.StarknetChainId.MAINNET,
       },
     },
   ],
