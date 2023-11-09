@@ -73,8 +73,30 @@ export const StakeCapitalItem = ({ account, pool }: Props) => {
 
   const handleChange = handleNumericChangeFactory(setText, setAmount);
 
-  const displayApy =
-    apy === undefined ? "--" : `${apy < 0 ? "" : "+"}${apy.toFixed(2)}%`;
+  const isOkAPY = (apy: number | undefined): apy is number => {
+    const MAX = 100;
+    const MIN = -70;
+
+    if (apy === undefined) {
+      return false;
+    }
+
+    if (apy > 0 && apy > MAX) {
+      // too big
+      return false;
+    }
+
+    if (apy < 0 && apy < MIN) {
+      // too small
+      return false;
+    }
+
+    return true;
+  };
+
+  const displayApy = isOkAPY(apy)
+    ? `${apy < 0 ? "" : "+"}${apy.toFixed(2)}%`
+    : "--";
   const apySx: CSSProperties = { fontWeight: "bold", textAlign: "center" };
   if (apy && apy < 0) {
     apySx.color = theme.palette.error.main;
@@ -82,10 +104,9 @@ export const StakeCapitalItem = ({ account, pool }: Props) => {
     apySx.color = theme.palette.success.main;
   }
 
-  const displayYieldSinceLaunch =
-    yieldSinceLaunch === undefined
-      ? "--"
-      : `${yieldSinceLaunch < 0 ? "" : "+"}${yieldSinceLaunch.toFixed(2)}%`;
+  const displayYieldSinceLaunch = isOkAPY(yieldSinceLaunch)
+    ? `${yieldSinceLaunch < 0 ? "" : "+"}${yieldSinceLaunch.toFixed(2)}%`
+    : "--";
   const yslSx: CSSProperties = { fontWeight: "bold", textAlign: "center" };
   if (yieldSinceLaunch && yieldSinceLaunch < 0) {
     yslSx.color = theme.palette.error.main;
