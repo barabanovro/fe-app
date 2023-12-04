@@ -3,7 +3,6 @@ import {
   TableCell,
   TableRow,
   TextField,
-  Tooltip,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -11,7 +10,6 @@ import { CSSProperties, useEffect, useState } from "react";
 import { AccountInterface } from "starknet";
 import { handleStake } from "./handleStake";
 import { handleNumericChangeFactory } from "../../utils/inputHandling";
-import { openCallWidoDialog, openPutWidoDialog } from "../../redux/actions";
 import { Pool } from "../../classes/Pool";
 import { intToDecimal } from "../../utils/units";
 import { BASE_DIGITS } from "../../constants/amm";
@@ -114,10 +112,6 @@ export const StakeCapitalItem = ({ account, pool }: Props) => {
     yslSx.color = theme.palette.success.main;
   }
 
-  const handleWidoClick = () => {
-    pool.isCall ? openCallWidoDialog() : openPutWidoDialog();
-  };
-
   const showPutSinceLaunch = true;
   const showPutLastWeek = true;
   const showCallSinceLaunch = true;
@@ -175,11 +169,6 @@ export const StakeCapitalItem = ({ account, pool }: Props) => {
             ? "Stake"
             : "Connect wallet"}
         </Button>
-        <Tooltip title="Stake from L1 directly to our liquidity pool - requires MetaMask">
-          <Button sx={{ ml: 1 }} variant="contained" onClick={handleWidoClick}>
-            Stake from L1
-          </Button>
-        </Tooltip>
       </TableCell>
     </TableRow>
   );
