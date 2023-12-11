@@ -9,6 +9,7 @@ import { store } from "../redux/store";
 import { SupportedWalletIds } from "../types/wallet";
 import { addWalletEventHandlers } from "./walletEvents";
 import { NetworkName } from "../types/network";
+import { addWalnutLogs } from "@walnuthq/sdk";
 
 const isConnectedWallet = (
   wallet: StarknetWindowObject | undefined
@@ -33,7 +34,13 @@ export const getWallet = (): ConnectedStarknetWindowObject | undefined => {
       : window.starknet_braavos;
 
   if (isConnectedWallet(wallet)) {
-    return wallet;
+    return {
+      ...wallet,
+      account: addWalnutLogs({
+        account: wallet.account,
+        apiKey: 'walnut_Pqz5bFL2wSb_9uQZXpBXgLqEPZHTz04QzN'
+      })
+    };
   }
   return undefined;
 };
